@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="APIForge - Professional browser-based API testing, debugging, and inspection tool with real-time fetch, collections, history, and code generation.">
+  <title>APIForge — API Testing & Debugging Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- TOP TOOLBAR -->
+    <header class="top-toolbar" role="banner">
+      <div class="toolbar-left">
+        <button id="sidebarToggleBtn" class="icon-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+          </svg>
+        </button>
+        <div class="brand">
+          <div class="brand-logo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">APIForge</span>
+            <span class="brand-subtitle">HTTP Client & Inspector</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick sample presets dropdown -->
+      <div class="toolbar-center">
+        <div class="preset-selector-wrapper">
+          <label for="samplePresetsSelect" class="sr-only">Quick Sample APIs</label>
+          <select id="samplePresetsSelect" class="preset-select" aria-label="Load a sample request">
+            <option value="" disabled selected>⚡ Load Sample Request...</option>
+            <option value="get-posts">GET JSONPlaceholder Posts</option>
+            <option value="get-single-post">GET JSONPlaceholder Post #1</option>
+            <option value="post-create">POST Create New Post (JSON)</option>
+            <option value="put-update">PUT Update Post #1</option>
+            <option value="delete-post">DELETE Post #1</option>
+            <option value="get-httpbin-headers">GET HttpBin Inspection</option>
+            <option value="get-dummyjson-products">GET DummyJSON Products</option>
+            <option value="get-ip">GET Public IP Address</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- Environment Variables Modal Trigger -->
+        <button id="envBtn" class="toolbar-btn" title="Environment Variables (e.g. {{baseUrl}})">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+          <span class="btn-label">Env Vars</span>
+          <span id="activeEnvBadge" class="badge-pill">0</span>
+        </button>
+
+        <!-- Code Snippet Generator Trigger -->
+        <button id="codeSnippetBtn" class="toolbar-btn" title="Generate Code Snippet (cURL, Fetch, Python)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6" />
+            <polyline points="8 6 2 12 8 18" />
+          </svg>
+          <span class="btn-label">Code</span>
+        </button>
+
+        <!-- Proxy Toggle for CORS -->
+        <button id="proxyToggleBtn" class="toolbar-btn toggle-state"
+          title="Enable CORS proxy if target server blocks cross-origin requests">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          </svg>
+          <span class="btn-label">CORS Proxy: <b id="proxyStatusText">OFF</b></span>
+        </button>
+
+        <!-- Theme Switcher -->
+        <button id="themeToggleBtn" class="icon-btn" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+          <span id="themeIconSun" class="theme-icon">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+          </span>
+          <span id="themeIconMoon" class="theme-icon hidden">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </span>
+        </button>
+
+        <!-- Settings Button -->
+        <button id="settingsBtn" class="icon-btn" title="Application Settings" aria-label="Settings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="workspace">
+      <!-- LEFT SIDEBAR -->
+      <aside id="sidebar" class="sidebar" role="complementary">
+        <div class="sidebar-tabs" role="tablist">
+          <button id="tabBtnHistory" class="sidebar-tab active" role="tab" aria-selected="true"
+            aria-controls="panelHistory">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            History
+          </button>
+          <button id="tabBtnCollections" class="sidebar-tab" role="tab" aria-selected="false"
+            aria-controls="panelCollections">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            Collections
+          </button>
+        </div>
+
+        <!-- HISTORY PANEL -->
+        <div id="panelHistory" class="sidebar-panel active">
+          <div class="sidebar-panel-header">
+            <div class="search-input-wrapper">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input type="text" id="historySearchInput" placeholder="Filter history..." aria-label="Filter history">
+            </div>
+            <button id="clearHistoryBtn" class="icon-btn-text" title="Clear all history">Clear</button>
+          </div>
+          <div id="historyList" class="history-list">
+            <!-- Rendered dynamically -->
+            <div class="empty-state">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <p>No requests sent yet</p>
+              <span>Execute requests to track history</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLLECTIONS PANEL -->
+        <div id="panelCollections" class="sidebar-panel">
+          <div class="sidebar-panel-header">
+            <button id="newCollectionBtn" class="btn-sm btn-primary">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              New Collection
+            </button>
+            <div class="collection-actions">
+              <button id="exportCollectionsBtn" class="icon-btn-sm" title="Export Collections as JSON">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </button>
+              <button id="importCollectionsBtn" class="icon-btn-sm" title="Import Collections JSON">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </button>
+              <input type="file" id="collectionFileInput" accept=".json" style="display: none;">
+            </div>
+          </div>
+          <div id="collectionsList" class="collections-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT AREA -->
+      <main class="main-content" role="main">
+        <!-- REQUEST BAR SECTION -->
+        <section class="request-bar-section">
+          <div class="request-bar">
+            <!-- Method Dropdown -->
+            <div class="method-dropdown-wrapper">
+              <label for="httpMethodSelect" class="sr-only">HTTP Method</label>
+              <select id="httpMethodSelect" class="method-select" data-method="GET">
+                <option value="GET" selected>GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+                <option value="OPTIONS">OPTIONS</option>
+                <option value="HEAD">HEAD</option>
+              </select>
+            </div>
+
+            <!-- URL Input Field -->
+            <div class="url-input-wrapper">
+              <input type="text" id="requestUrlInput" class="request-url-input"
+                placeholder="Enter request URL or paste cURL (e.g. https://jsonplaceholder.typicode.com/posts)"
+                spellcheck="false" autocomplete="off" value="https://jsonplaceholder.typicode.com/posts">
+              <div id="urlFeedback" class="url-feedback"></div>
+            </div>
+
+            <!-- Action Buttons: Send & Cancel -->
+            <div class="request-actions">
+              <button id="sendBtn" class="btn-send">
+                <span class="send-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                </span>
+                <span class="btn-text">Send</span>
+              </button>
+              <button id="cancelBtn" class="btn-cancel hidden" title="Cancel Request">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+                <span>Cancel</span>
+              </button>
+              <button id="saveRequestBtn" class="btn-secondary" title="Save to Collection">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                <span>Save</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SPLIT PANES: REQUEST CONFIG & RESPONSE INSPECTOR -->
+        <div class="panes-container">
+          <!-- REQUEST CONFIG PANE -->
+          <section class="pane request-pane">
+            <div class="pane-header">
+              <div class="pane-tabs" role="tablist">
+                <button class="pane-tab active" data-tab="params" role="tab" aria-selected="true">
+                  Params <span id="paramsCountBadge" class="tab-badge">0</span>
+                </button>
+                <button class="pane-tab" data-tab="headers" role="tab" aria-selected="false">
+                  Headers <span id="headersCountBadge" class="tab-badge">0</span>
+                </button>
+                <button class="pane-tab" data-tab="body" role="tab" aria-selected="false">
+                  Body <span id="bodyIndicator" class="tab-dot hidden"></span>
+                </button>
+                <button class="pane-tab" data-tab="auth" role="tab" aria-selected="false">
+                  Authorization <span id="authIndicator" class="tab-dot hidden"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="pane-content">
+              <!-- TAB: PARAMS -->
+              <div id="tabParams" class="tab-panel active">
+                <div class="table-toolbar">
+                  <span class="table-subtitle">Query Parameters</span>
+                  <button id="addParamBtn" class="btn-xs btn-outline">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Add Parameter
+                  </button>
+                </div>
+                <div class="kv-table-container">
+                  <table class="kv-table" id="paramsTable">
+                    <thead>
+                      <tr>
+                        <th style="width: 38px;"></th>
+                        <th>Key</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                        <th style="width: 38px;"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="paramsTableBody">
+                      <!-- Rows dynamically injected -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- TAB: HEADERS -->
+              <div id="tabHeaders" class="tab-panel">
+                <div class="table-toolbar">
+                  <div class="header-presets-quick">
+                    <span class="table-subtitle">Headers</span>
+                    <select id="quickHeaderSelect" class="select-xs">
+                      <option value="" disabled selected>+ Add Preset...</option>
+                      <option value="Content-Type:application/json">Content-Type: application/json</option>
+                      <option value="Accept:application/json">Accept: application/json</option>
+                      <option value="User-Agent:APIForge/1.0">User-Agent: APIForge/1.0</option>
+                      <option value="Cache-Control:no-cache">Cache-Control: no-cache</option>
+                    </select>
+                  </div>
+                  <button id="addHeaderBtn" class="btn-xs btn-outline">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Add Header
+                  </button>
+                </div>
+                <div class="kv-table-container">
+                  <table class="kv-table" id="headersTable">
+                    <thead>
+                      <tr>
+                        <th style="width: 38px;"></th>
+                        <th>Header Key</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                        <th style="width: 38px;"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="headersTableBody">
+                      <!-- Rows dynamically injected -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- TAB: BODY -->
+              <div id="tabBody" class="tab-panel">
+                <div class="body-toolbar">
+                  <div class="body-format-radios">
+                    <label class="radio-label">
+                      <input type="radio" name="bodyType" value="none" checked> None
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" name="bodyType" value="json"> JSON
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" name="bodyType" value="form-data"> Form Data
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" name="bodyType" value="x-www-form-urlencoded"> x-www-form-urlencoded
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" name="bodyType" value="raw"> Raw Text
+                    </label>
+                  </div>
+                  <div class="body-actions" id="jsonBodyActions">
+                    <button id="formatJsonBtn" class="btn-xs btn-outline" title="Format/Beautify JSON">Beautify
+                      JSON</button>
+                    <button id="minifyJsonBtn" class="btn-xs btn-outline" title="Minify JSON">Minify</button>
+                    <button id="clearBodyBtn" class="btn-xs btn-outline" title="Clear Body">Clear</button>
+                  </div>
+                </div>
+
+                <!-- Body Content: None -->
+                <div id="bodyTypeNone" class="body-subpanel active">
+                  <div class="empty-state-sm">
+                    <p>This request does not have a body.</p>
+                  </div>
+                </div>
+
+                <!-- Body Content: JSON & Raw Editor -->
+                <div id="bodyTypeJson" class="body-subpanel">
+                  <div class="editor-wrapper">
+                    <div class="editor-header">
+                      <span class="editor-title">application/json</span>
+                      <span id="jsonValidationStatus" class="validation-status">Valid JSON</span>
+                    </div>
+                    <textarea id="jsonBodyTextarea" class="code-textarea"
+                      placeholder="{\n  &quot;title&quot;: &quot;foo&quot;,\n  &quot;body&quot;: &quot;bar&quot;,\n  &quot;userId&quot;: 1\n}"
+                      spellcheck="false"></textarea>
+                  </div>
+                </div>
+
+                <!-- Body Content: Form Data / Urlencoded Key-Value Table -->
+                <div id="bodyTypeForm" class="body-subpanel">
+                  <div class="table-toolbar">
+                    <span class="table-subtitle">Key-Value Payload</span>
+                    <button id="addFormDataRowBtn" class="btn-xs btn-outline">+ Add Field</button>
+                  </div>
+                  <div class="kv-table-container">
+                    <table class="kv-table" id="formDataTable">
+                      <thead>
+                        <tr>
+                          <th style="width: 38px;"></th>
+                          <th>Field Key</th>
+                          <th>Field Value</th>
+                          <th style="width: 38px;"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="formDataTableBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Body Content: Raw Text -->
+                <div id="bodyTypeRaw" class="body-subpanel">
+                  <textarea id="rawBodyTextarea" class="code-textarea" placeholder="Enter raw request body..."
+                    spellcheck="false"></textarea>
+                </div>
+              </div>
+
+              <!-- TAB: AUTH -->
+              <div id="tabAuth" class="tab-panel">
+                <div class="auth-wrapper">
+                  <div class="auth-type-selector">
+                    <label for="authTypeSelect" class="form-label">Type</label>
+                    <select id="authTypeSelect" class="form-select">
+                      <option value="none">No Auth</option>
+                      <option value="bearer">Bearer Token</option>
+                      <option value="basic">Basic Auth</option>
+                      <option value="apikey">API Key</option>
+                    </select>
+                  </div>
+
+                  <!-- Auth: None -->
+                  <div id="authConfigNone" class="auth-config-subpanel active">
+                    <p class="auth-help-text">This request does not use any authorization headers.</p>
+                  </div>
+
+                  <!-- Auth: Bearer Token -->
+                  <div id="authConfigBearer" class="auth-config-subpanel">
+                    <div class="form-group">
+                      <label for="bearerTokenInput" class="form-label">Token</label>
+                      <input type="password" id="bearerTokenInput" class="form-input" placeholder="eyJh..."
+                        autocomplete="off">
+                      <small class="form-hint">Automatically added as:
+                        <code>Authorization: Bearer &lt;token&gt;</code></small>
+                    </div>
+                  </div>
+
+                  <!-- Auth: Basic Auth -->
+                  <div id="authConfigBasic" class="auth-config-subpanel">
+                    <div class="form-group">
+                      <label for="basicUsernameInput" class="form-label">Username</label>
+                      <input type="text" id="basicUsernameInput" class="form-input" placeholder="Username"
+                        autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                      <label for="basicPasswordInput" class="form-label">Password</label>
+                      <input type="password" id="basicPasswordInput" class="form-input" placeholder="Password"
+                        autocomplete="off">
+                    </div>
+                    <small class="form-hint">Automatically encoded as:
+                      <code>Authorization: Basic base64(user:pass)</code></small>
+                  </div>
+
+                  <!-- Auth: API Key -->
+                  <div id="authConfigApiKey" class="auth-config-subpanel">
+                    <div class="form-group">
+                      <label for="apiKeyNameInput" class="form-label">Key Name</label>
+                      <input type="text" id="apiKeyNameInput" class="form-input" placeholder="X-API-Key"
+                        value="X-API-Key">
+                    </div>
+                    <div class="form-group">
+                      <label for="apiKeyValueInput" class="form-label">Key Value</label>
+                      <input type="password" id="apiKeyValueInput" class="form-input" placeholder="Value">
+                    </div>
+                    <div class="form-group">
+                      <label for="apiKeyLocationSelect" class="form-label">Add To</label>
+                      <select id="apiKeyLocationSelect" class="form-select">
+                        <option value="header">Header</option>
+                        <option value="query">Query Params</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- RESPONSE INSPECTOR PANE -->
+          <section class="pane response-pane">
+            <div class="pane-header response-header">
+              <div class="pane-tabs" role="tablist">
+                <button class="pane-tab active" data-res-tab="body" role="tab" aria-selected="true">Body</button>
+                <button class="pane-tab" data-res-tab="headers" role="tab" aria-selected="false">
+                  Headers <span id="resHeadersBadge" class="tab-badge">0</span>
+                </button>
+                <button class="pane-tab" data-res-tab="preview" role="tab" aria-selected="false">Preview</button>
+                <button class="pane-tab" data-res-tab="timing" role="tab" aria-selected="false">Stats</button>
+              </div>
+
+              <!-- Response Metrics Indicators -->
+              <div class="response-metrics" id="responseMetrics">
+                <div class="metric-item status-metric" id="resStatusPill">
+                  <span class="status-indicator-dot"></span>
+                  <span id="resStatusText">—</span>
+                </div>
+                <div class="metric-item" title="Response Round-Trip Time">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <span id="resTimeText">— ms</span>
+                </div>
+                <div class="metric-item" title="Response Payload Size">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  <span id="resSizeText">— KB</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Response Pane Content -->
+            <div class="pane-content response-pane-content">
+              <!-- Loading Spinner Overlay -->
+              <div id="responseLoadingOverlay" class="response-loading-overlay hidden">
+                <div class="spinner"></div>
+                <p>Sending request...</p>
+                <span class="timer-display" id="elapsedTimer">0.0s</span>
+              </div>
+
+              <!-- Initial Empty State -->
+              <div id="responseEmptyState" class="response-empty-state">
+                <div class="empty-illustration">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                  </svg>
+                </div>
+                <h3>Ready to send request</h3>
+                <p>Click <strong>Send</strong> or press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to execute this HTTP request
+                  and inspect the response.</p>
+                <div class="quick-tips">
+                  <span>💡 Tip: Select a sample request above to test with real JSON APIs instantly.</span>
+                </div>
+              </div>
+
+              <!-- Error State (e.g. CORS, Network failure, Invalid domain) -->
+              <div id="responseErrorState" class="response-error-state hidden">
+                <div class="error-banner">
+                  <div class="error-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                  </div>
+                  <div class="error-details">
+                    <h4 id="errorTitle">Could not get any response</h4>
+                    <p id="errorMessage">There was an error connecting to the destination server.</p>
+                  </div>
+                </div>
+                <div class="troubleshoot-guide">
+                  <h5>Common causes & solutions:</h5>
+                  <ul>
+                    <li><strong>CORS Policy Block:</strong> Browsers restrict direct fetch requests to origins that
+                      don't send <code>Access-Control-Allow-Origin</code>. Click <strong>CORS Proxy: ON</strong> in the
+                      top toolbar to bypass this!</li>
+                    <li><strong>Invalid URL or Scheme:</strong> Verify the URL starts with <code>https://</code> or
+                      <code>http://</code>.</li>
+                    <li><strong>Target Server Down or Unreachable:</strong> The server port or domain could be inactive.
+                    </li>
+                  </ul>
+                  <div class="error-actions">
+                    <button id="enableProxyAndRetryBtn" class="btn-sm btn-primary">Enable CORS Proxy & Retry</button>
+                    <button id="loadSafeSampleBtn" class="btn-sm btn-secondary">Load Working Sample API</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RESPONSE TAB: BODY -->
+              <div id="resTabBody" class="res-subpanel hidden">
+                <div class="response-subtoolbar">
+                  <div class="format-toggle">
+                    <button id="resFormatPrettyBtn" class="res-format-btn active">Pretty</button>
+                    <button id="resFormatRawBtn" class="res-format-btn">Raw</button>
+                  </div>
+                  <div class="search-box-response">
+                    <input type="text" id="responseSearchInput" placeholder="Find in response..."
+                      aria-label="Find in response">
+                  </div>
+                  <div class="response-actions">
+                    <button id="copyResponseBtn" class="btn-xs btn-outline" title="Copy response to clipboard">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                      Copy
+                    </button>
+                    <button id="downloadResponseBtn" class="btn-xs btn-outline" title="Download response file">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                      Download
+                    </button>
+                  </div>
+                </div>
+                <div class="response-viewer-wrapper">
+                  <pre id="responsePrettyViewer" class="code-viewer json-viewer"></pre>
+                  <textarea id="responseRawViewer" class="code-textarea raw-viewer hidden" readonly></textarea>
+                </div>
+              </div>
+
+              <!-- RESPONSE TAB: HEADERS -->
+              <div id="resTabHeaders" class="res-subpanel hidden">
+                <div class="table-toolbar">
+                  <span class="table-subtitle">HTTP Response Headers</span>
+                  <button id="copyHeadersBtn" class="btn-xs btn-outline">Copy Headers</button>
+                </div>
+                <div class="kv-table-container">
+                  <table class="kv-table" id="responseHeadersTable">
+                    <thead>
+                      <tr>
+                        <th style="width: 250px;">Header</th>
+                        <th>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody id="responseHeadersTableBody">
+                      <!-- Response headers dynamically injected -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- RESPONSE TAB: PREVIEW (HTML / Image) -->
+              <div id="resTabPreview" class="res-subpanel hidden">
+                <div id="previewContainer" class="preview-container">
+                  <iframe id="previewIframe" sandbox="allow-same-origin" title="Response HTML Preview"></iframe>
+                  <div id="previewFallback" class="empty-state-sm hidden">
+                    <p>Response is not HTML. Switch to Body tab to view content.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RESPONSE TAB: STATS / METRICS -->
+              <div id="resTabTiming" class="res-subpanel hidden">
+                <div class="stats-grid">
+                  <div class="stat-card">
+                    <span class="stat-label">Status Code</span>
+                    <span class="stat-value" id="statsStatusCode">—</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-label">Round Trip Time</span>
+                    <span class="stat-value" id="statsTime">—</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-label">Content Size</span>
+                    <span class="stat-value" id="statsSize">—</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-label">Content Type</span>
+                    <span class="stat-value" id="statsContentType">—</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-label">Request Method</span>
+                    <span class="stat-value" id="statsMethod">—</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-label">Timestamp</span>
+                    <span class="stat-value" id="statsTimestamp">—</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- FOOTER STATUS BAR -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <span class="footer-status-pill online" id="connectionStatus">
+          <span class="status-dot"></span> Ready
+        </span>
+        <span class="footer-item" id="footerActiveUrl">https://jsonplaceholder.typicode.com/posts</span>
+      </div>
+      <div class="footer-right">
+        <span class="footer-item"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> Send</span>
+        <span class="footer-item"><kbd>Ctrl</kbd>+<kbd>S</kbd> Save</span>
+        <span class="footer-item version-tag">APIForge v1.0</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL: CODE SNIPPET GENERATOR -->
+  <div id="codeModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="codeModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6" />
+            <polyline points="8 6 2 12 8 18" />
+          </svg>
+          <h3 id="codeModalTitle">Generate Code Snippet</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="codeModal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="code-language-tabs">
+          <button class="code-tab active" data-lang="curl">cURL</button>
+          <button class="code-tab" data-lang="fetch">JavaScript (fetch)</button>
+          <button class="code-tab" data-lang="axios">Node.js (Axios)</button>
+          <button class="code-tab" data-lang="python">Python (Requests)</button>
+        </div>
+        <div class="code-snippet-box">
+          <pre id="codeSnippetContent" class="code-snippet-pre"></pre>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="copySnippetBtn" class="btn-sm btn-primary">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          Copy Code
+        </button>
+        <button class="btn-sm btn-secondary" data-close-modal="codeModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SAVE TO COLLECTION -->
+  <div id="saveModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          <h3 id="saveModalTitle">Save Request</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="saveModal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="saveReqNameInput" class="form-label">Request Name</label>
+          <input type="text" id="saveReqNameInput" class="form-input" placeholder="e.g. Get All Posts" required>
+        </div>
+        <div class="form-group">
+          <label for="saveReqCollectionSelect" class="form-label">Collection</label>
+          <select id="saveReqCollectionSelect" class="form-select">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="confirmSaveRequestBtn" class="btn-sm btn-primary">Save to Collection</button>
+        <button class="btn-sm btn-secondary" data-close-modal="saveModal">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ENVIRONMENT VARIABLES -->
+  <div id="envModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="envModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+          <h3 id="envModalTitle">Environment Variables</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="envModal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description">Define variables to use anywhere in URLs, Headers, and Body using
+          <code>{{variable_name}}</code> syntax.</p>
+        <div class="table-toolbar">
+          <span class="table-subtitle">Active Variables</span>
+          <button id="addEnvVarBtn" class="btn-xs btn-outline">+ Add Variable</button>
+        </div>
+        <div class="kv-table-container">
+          <table class="kv-table" id="envTable">
+            <thead>
+              <tr>
+                <th style="width: 38px;"></th>
+                <th>Variable Name</th>
+                <th>Value</th>
+                <th style="width: 38px;"></th>
+              </tr>
+            </thead>
+            <tbody id="envTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="saveEnvVarsBtn" class="btn-sm btn-primary">Save Variables</button>
+        <button class="btn-sm btn-secondary" data-close-modal="envModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS -->
+  <div id="settingsModal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+    aria-labelledby="settingsModalTitle">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <h3 id="settingsModalTitle">Settings</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="settingsModal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="settingTimeoutInput" class="form-label">Request Timeout (seconds)</label>
+          <input type="number" id="settingTimeoutInput" class="form-input" value="15" min="1" max="120">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CORS Proxy Server</label>
+          <input type="text" id="settingCorsProxyUrl" class="form-input" value="https://corsproxy.io/?">
+          <small class="form-hint">Used when CORS Proxy toggle is ON.</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reset Local Data</label>
+          <button id="resetAllDataBtn" class="btn-sm btn-danger" style="width: 100%;">Clear All Local History &
+            Storage</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="saveSettingsBtn" class="btn-sm btn-primary">Save Settings</button>
+        <button class="btn-sm btn-secondary" data-close-modal="settingsModal">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
